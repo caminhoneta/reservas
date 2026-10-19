@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Equipe · Caminhoneta</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bevan&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #0B0B0A; --bg-soft: #131211; --surface: #1A1917; --surface-2: #232120;
+    --border: rgba(232,223,199,0.14); --border-strong: rgba(232,223,199,0.32);
+    --bone: #E8DFC8; --bone-bright: #F5EFDD; --bone-dim: #A79F8B;
+    --spark: #F0C94A; --spark-bright: #FBE38A;
+    --text: #EDE6D6; --text-muted: #A79F8B; --text-faint: #6E6759;
+    --occupied: #3A3833; --danger: #C56B54;
+    --shadow: 0 24px 60px -22px rgba(0,0,0,0.7);
+  }
+  html[data-theme="light"]{
+    --bg: #F1EAD8; --bg-soft: #E9E1CB; --surface: #FBF8F0; --surface-2: #F3EDDD;
+    --border: rgba(20,18,14,0.14); --border-strong: rgba(20,18,14,0.3);
+    --bone: #17140D; --bone-bright: #0E0C08; --bone-dim: #5B5445;
+    --spark: #B5860E; --spark-bright: #8E6A08;
+    --text: #17140D; --text-muted: #5B5445; --text-faint: #8B8471;
+    --occupied: #DCD3BB; --danger: #A4472E;
+    --shadow: 0 20px 50px -26px rgba(60,50,20,0.22);
+  }
+  *{ box-sizing:border-box; margin:0; padding:0; }
+  html{ scroll-behavior:smooth; }
+  body{ background:var(--bg); color:var(--text); font-family:'Inter', sans-serif; -webkit-font-smoothing:antialiased; transition:background .4s ease, color .4s ease; overflow-x:hidden; }
+  ::selection{ background:var(--spark); color:#0B0B0A; }
+  .grain{ position:fixed; inset:0; pointer-events:none; opacity:.045; z-index:1; mix-blend-mode:overlay;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
+
+  header{ position:sticky; top:0; z-index:50; display:flex; align-items:center; justify-content:space-between;
+    padding:16px clamp(20px,5vw,64px); background:color-mix(in srgb, var(--bg) 80%, transparent); backdrop-filter:blur(14px); border-bottom:1px solid var(--border); }
+  .brand{ display:flex; align-items:center; gap:13px; }
+  .brand-mark{ width:40px; height:40px; border-radius:50%; border:1.5px solid var(--bone); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+  .brand-mark svg{ width:15px; height:20px; fill:var(--bone); }
+  .brand-name{ font-family:'Bevan', serif; font-weight:400; font-size:18px; letter-spacing:.5px; line-height:1; }
+  .brand-name span{ display:block; font-family:'JetBrains Mono',monospace; font-size:9px; letter-spacing:3px; color:var(--text-faint); font-weight:600; margin-top:5px; }
+  .theme-toggle{ width:38px; height:38px; border-radius:50%; border:1px solid var(--border-strong); background:var(--surface);
+    display:flex; align-items:center; justify-content:center; cursor:pointer; transition:all .3s ease; color:var(--bone); }
+  .theme-toggle:hover{ border-color:var(--bone); transform:rotate(18deg); }
+  .theme-toggle svg{ width:16px; height:16px; }
+  .header-actions{ display:flex; align-items:center; gap:12px; }
+  .btn-fale{ display:flex; align-items:center; gap:8px; padding:10px 16px; border-radius:24px; border:1px solid var(--border-strong);
+    background:transparent; color:var(--bone-bright); font-family:'Inter',sans-serif; font-weight:700; font-size:12.5px;
+    letter-spacing:.3px; text-transform:uppercase; text-decoration:none; transition:all .25s ease; }
+  .btn-fale svg{ width:15px; height:15px; stroke:var(--spark); flex-shrink:0; }
+  .btn-fale:hover{ background:var(--bone-bright); color:#0B0B0A; border-color:var(--bone-bright); }
+  .btn-fale:hover svg{ stroke:#0B0B0A; }
+
+  /* view switch */
+  .view-switch{ display:flex; justify-content:center; padding:22px 20px 4px; }
+  .switch-pill{ display:inline-flex; background:var(--surface); border:1px solid var(--border); border-radius:30px; padding:4px; gap:2px; }
+  .switch-btn{ font-family:'Inter',sans-serif; font-weight:700; font-size:12.5px; letter-spacing:.3px; text-transform:uppercase;
+    padding:10px 20px; border-radius:24px; border:none; background:transparent; color:var(--text-faint); cursor:pointer; transition:all .25s ease; }
+  .switch-btn.active{ background:var(--bone-bright); color:#0B0B0A; }
+
+  main.view{ display:none; }
+  main.view.active{ display:block; animation:viewIn .4s ease; }
+  @keyframes viewIn{ from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:translateY(0);} }
+
+  /* ---------- Hero ---------- */
+  .hero{ position:relative; z-index:2; padding:clamp(30px,6vw,56px) clamp(20px,5vw,64px) 20px;
+    display:grid; grid-template-columns:1fr 1fr; gap:56px; align-items:start; max-width:1320px; margin:0 auto; }
+  .eyebrow{ display:flex; align-items:center; gap:9px; font-family:'JetBrains Mono', monospace; font-size:10.5px; letter-spacing:2px;
+    color:var(--spark); text-transform:uppercase; margin-bottom:18px; font-weight:700; }
+  .eyebrow .sep{ color:var(--text-faint); }
+  h1{ font-family:'Bevan', serif; font-weight:400; font-size:clamp(34px,4.4vw,52px); line-height:1.03; letter-spacing:-.5px; margin-bottom:16px; text-transform:uppercase; }
+  h1 em{ font-style:normal; color:var(--spark); }
+  .hero p.lead{ color:var(--text-muted); font-size:15.5px; line-height:1.7; max-width:440px; margin-bottom:26px; }
+  .stats-row{ display:flex; gap:28px; margin-top:30px; padding-top:22px; border-top:1px solid var(--border); flex-wrap:wrap; }
+  .stat b{ font-family:'Bevan',serif; font-size:21px; font-weight:400; display:block; color:var(--bone-bright); }
+  .stat span{ font-size:11px; color:var(--text-faint); }
+
+  /* ---------- Widget ---------- */
+  .widget{ background:var(--surface); border:1px solid var(--border); border-radius:16px; padding:26px; box-shadow:var(--shadow); position:relative; overflow:hidden; }
+  .widget::before{ content:''; position:absolute; top:0; left:0; right:0; height:2px; background:linear-gradient(90deg, transparent, var(--bone), transparent); }
+  .widget-title{ font-family:'Bevan',serif; font-size:17px; font-weight:400; margin-bottom:4px; text-transform:uppercase; letter-spacing:.3px; }
+  .widget-sub{ font-size:12.5px; color:var(--text-faint); margin-bottom:20px; }
+
+  .field-row{ display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:10px; }
+  .field{ background:var(--surface-2); border:1px solid var(--border); border-radius:9px; padding:11px 13px; transition:border-color .2s ease; }
+  .field:focus-within{ border-color:var(--bone); }
+  .field label{ display:block; font-size:9.5px; letter-spacing:1px; text-transform:uppercase; color:var(--text-faint); margin-bottom:5px; font-weight:700; }
+  .field select, .field input{ background:transparent; border:none; color:var(--text); font-family:'JetBrains Mono',monospace; font-size:13px; width:100%; outline:none; }
+  .field select option{ background:var(--surface); color:var(--text); }
+  .field.error{ border-color:var(--danger); }
+  .field-hint{ font-size:10.5px; color:var(--text-faint); margin:5px 2px 0; }
+  .field-hint.error-msg{ color:var(--danger); display:none; }
+  .field-hint.error-msg.show{ display:block; }
+
+  .time-block{ background:var(--surface-2); border:1px solid var(--border); border-radius:9px; padding:12px 13px; margin-bottom:10px; }
+  .time-block label{ display:block; font-size:9.5px; letter-spacing:1px; text-transform:uppercase; color:var(--text-faint); margin-bottom:9px; font-weight:700; }
+  .chips{ display:flex; flex-wrap:wrap; gap:7px; }
+  .chip{ padding:7px 11px; border:1px solid var(--border-strong); border-radius:16px; font-family:'JetBrains Mono',monospace; font-size:11.5px;
+    color:var(--text-muted); background:transparent; cursor:pointer; transition:all .18s ease; }
+  .chip:hover{ border-color:var(--bone); color:var(--bone-bright); }
+  .chip.active{ background:var(--bone-bright); color:#0B0B0A; border-color:var(--bone-bright); font-weight:700; }
+
+  .btn-search{ width:100%; margin-top:12px; padding:14px; border-radius:9px; border:none; cursor:pointer; background:var(--bone-bright); color:#0B0B0A;
+    font-family:'Inter',sans-serif; font-weight:800; font-size:13px; letter-spacing:.5px; text-transform:uppercase;
+    display:flex; align-items:center; justify-content:center; gap:8px; transition:all .25s ease; }
+  .btn-search:hover{ background:var(--spark-bright); transform:translateY(-1px); }
+  .loading-line{ height:2px; width:100%; background:var(--border); border-radius:2px; overflow:hidden; margin-top:12px; display:none; }
+  .loading-line.show{ display:block; }
+  .loading-line i{ display:block; height:100%; width:40%; background:var(--spark); animation:load .9s ease-in-out; }
+  @keyframes load{ from{ margin-left:-40%; } to{ margin-left:100%; } }
+
+  .result{ margin-top:14px; padding:14px; border-radius:11px; border:1px solid var(--border-strong); background:var(--surface-2); display:none; flex-direction:column; gap:10px; }
+  .result.show{ display:flex; animation:fadeUp .5s ease forwards; }
+  @keyframes fadeUp{ from{opacity:0; transform:translateY(10px);} to{opacity:1; transform:translateY(0);} }
+  .result-top{ display:flex; align-items:center; gap:12px; }
+  .result-dot{ width:10px; height:10px; border-radius:50%; background:var(--spark); box-shadow:0 0 0 4px rgba(240,201,74,0.2); flex-shrink:0; animation:pulse 1.8s ease-in-out infinite; }
+  @keyframes pulse{ 0%,100%{ box-shadow:0 0 0 4px rgba(240,201,74,0.2);} 50%{ box-shadow:0 0 0 8px rgba(240,201,74,0.06);} }
+  .result-text b{ font-size:13.5px; display:block; margin-bottom:2px; }
+  .result-text span{ font-size:11px; color:var(--text-faint); font-family:'JetBrains Mono',monospace; }
+  .result .btn-mini{ margin-left:auto; padding:9px 14px; border-radius:7px; font-size:11px; font-weight:800; background:transparent;
+    border:1px solid var(--bone); color:var(--bone-bright); cursor:pointer; white-space:nowrap; text-transform:uppercase; letter-spacing:.4px; }
+  .cross-note{ display:flex; align-items:center; gap:7px; font-size:10.5px; color:var(--text-faint); font-family:'JetBrains Mono',monospace; }
+  .cross-note svg{ width:12px; height:12px; stroke:var(--spark); flex-shrink:0; }
+
+  /* whatsapp preview */
+  .wa-preview{ margin-top:14px; display:none; }
+  .wa-preview.show{ display:block; animation:fadeUp .5s ease forwards; }
+  .wa-card{ border:1px solid var(--border-strong); border-radius:11px; overflow:hidden; }
+  .wa-head{ padding:10px 14px; background:var(--surface-2); font-size:10.5px; letter-spacing:1px; text-transform:uppercase; color:var(--text-faint); font-weight:700; display:flex; align-items:center; gap:7px; }
+  .wa-head svg{ width:13px; height:13px; stroke:var(--spark); }
+  .wa-bubble{ background:var(--surface-2); padding:14px; }
+  .wa-msg{ background:var(--surface); border:1px solid var(--border); border-radius:12px; border-top-left-radius:3px; padding:12px 14px; font-size:12.5px; line-height:1.6; max-width:88%; }
+  .wa-msg b{ color:var(--bone-bright); }
+  .wa-meta{ display:flex; justify-content:flex-end; gap:5px; margin-top:6px; font-size:9.5px; color:var(--text-faint); font-family:'JetBrains Mono',monospace; }
+  .wa-buttons{ display:flex; flex-direction:column; gap:1px; margin-top:10px; border-top:1px solid var(--border); padding-top:1px; }
+  .wa-btn{ background:var(--surface); border:none; border-top:1px solid var(--border); padding:11px; font-family:'Inter',sans-serif; font-weight:700; font-size:12px;
+    color:var(--spark); cursor:pointer; transition:background .15s ease; }
+  .wa-btn:first-child{ border-top:none; }
+  .wa-btn:hover{ background:var(--surface-2); }
+  .wa-btn-danger{ color:var(--danger); }
+  .wa-btn:disabled{ opacity:.4; cursor:default; }
+
+  .qr-box{ display:flex; align-items:center; gap:14px; margin-top:12px; padding:12px; border:1px dashed var(--border-strong); border-radius:10px; background:var(--surface); }
+  .qr-ph{ width:64px; height:64px; flex-shrink:0; border-radius:6px; background:
+    conic-gradient(from 90deg at 50% 50%, var(--bone) 0 25%, transparent 0 50%, var(--bone) 0 75%, transparent 0) 0 0/16px 16px; opacity:.85; }
+  .qr-box p{ font-size:11.5px; line-height:1.5; color:var(--text-muted); }
+  .qr-box p b{ color:var(--bone-bright); display:block; margin-bottom:2px; font-size:12px; }
+  .help-link{ display:inline-block; margin-top:10px; font-size:11.5px; color:var(--text-faint); text-decoration:underline; }
+  .help-link:hover{ color:var(--bone-bright); }
+  footer{ position:relative; z-index:2; border-top:1px solid var(--border); padding:26px clamp(20px,5vw,64px);
+    display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; }
+  footer .f-brand{ font-family:'Bevan',serif; font-size:13px; color:var(--text-muted); text-transform:uppercase; letter-spacing:.3px; }
+  footer .f-note{ font-size:10.5px; color:var(--text-faint); font-family:'JetBrains Mono',monospace; }
+
+  /* ---------- Admin ---------- */
+  .admin-wrap{ max-width:1320px; margin:0 auto; padding:30px clamp(20px,5vw,64px) 90px; position:relative; z-index:2; }
+  .admin-head{ display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:16px; margin-bottom:26px; }
+  .admin-head h2{ font-family:'Bevan',serif; font-weight:400; font-size:clamp(24px,3vw,32px); text-transform:uppercase; margin-bottom:6px; }
+  .live-tag{ display:inline-flex; align-items:center; gap:7px; font-family:'JetBrains Mono',monospace; font-size:10.5px; letter-spacing:1.5px;
+    text-transform:uppercase; color:var(--text-faint); }
+  .live-dot{ width:7px; height:7px; border-radius:50%; background:var(--spark); animation:pulse 1.8s ease-in-out infinite; }
+
+  .stats-grid{ display:grid; grid-template-columns:repeat(4, 1fr); gap:16px; margin-bottom:28px; }
+  .stat-card{ background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:20px; }
+  .stat-card .lbl{ font-size:10.5px; letter-spacing:1px; text-transform:uppercase; color:var(--text-faint); font-weight:700; margin-bottom:10px; }
+  .stat-card .val{ font-family:'Bevan',serif; font-size:32px; font-weight:400; color:var(--bone-bright); margin-bottom:4px; }
+  .stat-card .delta{ font-size:11px; color:var(--text-faint); }
+  .stat-card .delta.up{ color:var(--spark); }
+
+  .filters-bar{ display:flex; gap:12px; flex-wrap:wrap; align-items:center; margin-bottom:22px; padding:16px; background:var(--surface); border:1px solid var(--border); border-radius:12px; }
+  .search-box{ flex:1; min-width:200px; display:flex; align-items:center; gap:9px; background:var(--surface-2); border:1px solid var(--border); border-radius:8px; padding:10px 13px; }
+  .search-box svg{ width:15px; height:15px; stroke:var(--text-faint); flex-shrink:0; }
+  .search-box input{ background:transparent; border:none; outline:none; color:var(--text); font-family:'Inter',sans-serif; font-size:13px; width:100%; }
+  .filter-chips{ display:flex; gap:7px; flex-wrap:wrap; }
+  .fchip{ padding:8px 13px; border:1px solid var(--border-strong); border-radius:16px; font-family:'Inter',sans-serif; font-weight:600; font-size:11.5px; color:var(--text-muted); background:transparent; cursor:pointer; transition:all .18s ease; }
+  .fchip.active{ background:var(--bone-bright); color:#0B0B0A; border-color:var(--bone-bright); }
+  select.fselect{ padding:9px 12px; border-radius:8px; border:1px solid var(--border-strong); background:var(--surface-2); color:var(--text); font-family:'Inter',sans-serif; font-size:12px; outline:none; }
+
+  .admin-grid{ display:grid; grid-template-columns:1.6fr 1fr; gap:20px; align-items:start; }
+  .panel{ background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:20px; }
+  .panel h3{ font-family:'Bevan',serif; font-weight:400; font-size:15px; text-transform:uppercase; margin-bottom:16px; letter-spacing:.3px; }
+
+  table.res-table{ width:100%; border-collapse:collapse; }
+  table.res-table th{ text-align:left; font-size:9.5px; letter-spacing:1px; text-transform:uppercase; color:var(--text-faint); padding:0 8px 10px; font-weight:700; }
+  table.res-table td{ padding:11px 8px; font-size:12.5px; border-top:1px solid var(--border); }
+  table.res-table tr.row-cancelada td{ color:var(--text-faint); text-decoration:line-through; opacity:.6; }
+  .badge{ display:inline-block; padding:4px 9px; border-radius:12px; font-size:10px; font-weight:700; letter-spacing:.3px; text-transform:uppercase; }
+  .badge-confirmada{ background:rgba(240,201,74,0.15); color:var(--spark); }
+  .badge-pendente{ background:rgba(232,223,199,0.1); color:var(--text-muted); }
+  .badge-cancelada{ background:rgba(197,107,84,0.15); color:var(--danger); }
+  .row-action{ background:transparent; border:1px solid var(--border-strong); color:var(--text-muted); font-size:10.5px; font-weight:700; padding:5px 9px; border-radius:6px; cursor:pointer; text-transform:uppercase; letter-spacing:.3px; }
+  .row-action:hover{ border-color:var(--danger); color:var(--danger); }
+  .no-results{ text-align:center; padding:30px 10px; color:var(--text-faint); font-size:12.5px; display:none; }
+  .no-results.show{ display:block; }
+
+  .mini-legend{ display:flex; gap:14px; font-size:10.5px; color:var(--text-muted); flex-wrap:wrap; }
+  .mini-legend span{ display:flex; align-items:center; gap:6px; }
+  .mini-legend i{ width:8px; height:8px; border-radius:2px; display:inline-block; }
+
+  /* ---------- Capacidade ---------- */
+  .cap-gauge{ margin-bottom:20px; }
+  .cap-gauge-top{ display:flex; justify-content:space-between; align-items:baseline; margin-bottom:8px; }
+  .cap-gauge-top b{ font-family:'Bevan',serif; font-size:22px; font-weight:400; color:var(--bone-bright); }
+  .cap-gauge-top span{ font-size:11px; color:var(--text-faint); font-family:'JetBrains Mono',monospace; }
+  .cap-bar{ height:10px; border-radius:6px; background:var(--surface-2); border:1px solid var(--border); overflow:hidden; }
+  .cap-bar i{ display:block; height:100%; background:var(--spark); border-radius:6px; transition:width .4s ease; }
+  .cap-bar.full i{ background:var(--danger); }
+  .cap-hours{ display:flex; flex-direction:column; gap:9px; margin-top:18px; }
+  .cap-hour-row{ display:grid; grid-template-columns:44px 1fr 40px; align-items:center; gap:10px; }
+  .cap-hour-row span:first-child{ font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--text-faint); }
+  .cap-hour-row span:last-child{ font-family:'JetBrains Mono',monospace; font-size:10.5px; color:var(--text-faint); text-align:right; }
+  .cap-hour-bar{ height:7px; border-radius:4px; background:var(--surface-2); overflow:hidden; }
+  .cap-hour-bar i{ display:block; height:100%; background:var(--bone-dim); border-radius:4px; }
+  .cap-hour-bar i.full{ background:var(--danger); }
+
+  @media (max-width: 980px){
+    .hero{ grid-template-columns:1fr; }
+    .stats-grid{ grid-template-columns:1fr 1fr; }
+    .admin-grid{ grid-template-columns:1fr; }
+  }
+  @media (max-width: 640px){
+    .field-row{ grid-template-columns:1fr; }
+    .stats-grid{ grid-template-columns:1fr; }
+    table.res-table{ font-size:11px; }
+    .btn-fale span{ display:none; }
+    .btn-fale{ padding:10px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="grain"></div>
+
+<header>
+  <div class="brand">
+    <div class="brand-mark"><svg viewBox="0 0 24 32"><path d="M14 0 L2 18 H10 L8 32 L22 12 H13 Z"/></svg></div>
+    <div class="brand-name">Caminhoneta<span>Burger · Parrilla</span></div>
+  </div>
+  <div class="header-actions">
+    <a class="btn-fale" href="https://wa.me/5511999999999" target="_blank" rel="noopener">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/></svg>
+      <span>Fale com a gente</span>
+    </a>
+    <button class="theme-toggle" id="themeToggle" aria-label="Alternar tema">
+      <svg id="iconMoon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+      <svg id="iconSun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+    </button>
+  </div>
+</header>
+
+<div class="view-switch">
+  <div class="switch-pill">
+    <button class="switch-btn active" data-view="cliente">Experiência do Cliente</button>
+    <button class="switch-btn" data-view="admin">Painel Administrativo</button>
+  </div>
+</div>
+
+<!-- ===================== VIEW CLIENTE ===================== -->
+<main class="view active" id="viewCliente">
+  <section class="hero" id="reservar">
+    <div class="hero-copy">
+      <div class="eyebrow">Reservas Online <span class="sep">·</span> Caminhoneta <span class="sep">·</span> Burger y Parrilla</div>
+      <h1>Sua mesa.<br><em>Garantida.</em></h1>
+      <p class="lead">Diga quantas pessoas vêm, se tem criança ou alguém que precisa de acesso especial, e a gente cruza tudo isso com a capacidade do restaurante em tempo real pra garantir sua reserva.</p>
+      <div class="stats-row">
+        <div class="stat"><b>&lt;60s</b><span>pra fechar a reserva</span></div>
+        <div class="stat"><b>120</b><span>lugares monitorados ao vivo</span></div>
+        <div class="stat"><b>100%</b><span>confirmação por WhatsApp</span></div>
+      </div>
+    </div>
+
+    <div class="widget-wrap">
+      <div class="widget">
+        <div class="widget-title">Garantir mesa</div>
+        <div class="widget-sub">Preencha os dados e a gente resolve o resto.</div>
+
+        <div class="field-row" style="grid-template-columns:1fr;">
+          <div class="field" id="fNomeField">
+            <label>Nome</label>
+            <input type="text" id="fNome" placeholder="Seu nome completo">
+          </div>
+        </div>
+        <div class="field-hint error-msg" id="nomeHint">Precisamos do seu nome pra confirmar a reserva 🙂</div>
+
+        <div class="field-row">
+          <div class="field">
+            <label>Data</label>
+            <input type="date" id="fData" value="2026-07-25">
+          </div>
+          <div class="field">
+            <label>Pessoas</label>
+            <select id="fPessoas">
+              <option value="2">2 pessoas</option>
+              <option value="3">3 pessoas</option>
+              <option value="4" selected>4 pessoas</option>
+              <option value="6">6 pessoas</option>
+              <option value="10">8+ pessoas (a gente junta mesa)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="field-row">
+          <div class="field">
+            <label>Crianças</label>
+            <select id="fCriancas">
+              <option value="0" selected>Nenhuma</option>
+              <option value="1">1 criança</option>
+              <option value="2">2 crianças</option>
+              <option value="3">3 crianças</option>
+              <option value="4">4+ crianças</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>PCD / Cadeirante</label>
+            <select id="fPcd">
+              <option value="0" selected>Nenhum</option>
+              <option value="1">1 pessoa</option>
+              <option value="2">2 pessoas</option>
+              <option value="3">3+ pessoas</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="time-block">
+          <label>Horário</label>
+          <div class="chips" id="timeChips">
+            <button class="chip" data-min="1080">18:00</button>
+            <button class="chip" data-min="1110">18:30</button>
+            <button class="chip" data-min="1140">19:00</button>
+            <button class="chip" data-min="1170">19:30</button>
+            <button class="chip active" data-min="1200">20:00</button>
+            <button class="chip" data-min="1230">20:30</button>
+            <button class="chip" data-min="1260">21:00</button>
+            <button class="chip" data-min="1290">21:30</button>
+            <button class="chip" data-min="1320">22:00</button>
+          </div>
+        </div>
+
+        <div class="field-row" style="grid-template-columns:1fr;">
+          <div class="field" id="fWaField">
+            <label>WhatsApp</label>
+            <input type="tel" id="fWa" placeholder="(11) 91234-5678">
+          </div>
+        </div>
+        <div class="field-hint" id="waHint">Usamos esse número só pra confirmar sua reserva e avisar de qualquer mudança.</div>
+
+        <button class="btn-search" id="btnBuscar">Buscar minha mesa</button>
+        <div class="loading-line" id="loadingLine"><i></i></div>
+
+        <div class="result" id="resultBox">
+          <div class="result-top">
+            <div class="result-dot"></div>
+            <div class="result-text">
+              <b id="resTitle">Mesa 12 · Área Externa</b>
+              <span id="resSub">Sugestão automática · janela, 4 lugares</span>
+            </div>
+            <button class="btn-mini" id="btnConfirmar">Confirmar</button>
+          </div>
+          <div class="cross-note">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M4 12l5 5L20 6"/></svg>
+            Cruzado com a capacidade do restaurante em tempo real — dentro do limite de 120 lugares
+          </div>
+        </div>
+
+        <div class="wa-preview" id="waPreview">
+          <div class="wa-card">
+            <div class="wa-head"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/></svg>Reserva confirmada</div>
+            <div class="wa-bubble">
+              <div class="wa-msg" id="waMsg"></div>
+              <div class="qr-box"><div class="qr-ph"></div><p><b>QR Code de check-in</b>Mostre na chegada. Guarde o código da reserva: é com ele que você altera ou cancela.</p></div>
+              <div class="wa-buttons" id="waButtons"></div>
+            </div>
+          </div>
+          <div class="field-hint" style="margin-top:8px;">Protótipo: no sistema real o cliente também recebe esse resumo por e-mail e acessa "Minha reserva" pelo código. <a class="help-link" href="https://wa.me/5511999999999" target="_blank" rel="noopener" style="margin-top:0;">Precisa de ajuda? Fale com a gente</a></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="f-brand">Caminhoneta · Burger y Parrilla</div>
+    <div class="f-note">ÁREA DA EQUIPE · PROTÓTIPO</div>
+  </footer>
+</main>
+
+<!-- ===================== VIEW ADMIN ===================== -->
+<main class="view" id="viewAdmin">
+  <div class="admin-wrap">
+    <div class="admin-head">
+      <div>
+        <h2>Painel Administrativo</h2>
+        <div class="live-tag"><span class="live-dot"></span>Atualizando automaticamente</div>
+      </div>
+    </div>
+
+    <div class="stats-grid">
+      <div class="stat-card"><div class="lbl">Reservas hoje</div><div class="val">18</div><div class="delta up">+4 vs. sexta passada</div></div>
+      <div class="stat-card"><div class="lbl">Lugares ocupados agora</div><div class="val" id="statLugaresAgora">—/120</div><div class="delta" id="statLugaresPct">—</div></div>
+      <div class="stat-card"><div class="lbl">Lista de espera</div><div class="val">3</div><div class="delta">grupos aguardando</div></div>
+      <div class="stat-card"><div class="lbl">Confirmação WhatsApp</div><div class="val">100%</div><div class="delta up">enviadas automaticamente</div></div>
+    </div>
+
+    <div class="filters-bar">
+      <div class="search-box">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+        <input type="text" id="adminSearch" placeholder="Buscar por cliente ou código…">
+      </div>
+      <div class="filter-chips" id="dayChips">
+        <button class="fchip active" data-day="hoje">Hoje</button>
+        <button class="fchip" data-day="amanha">Amanhã</button>
+        <button class="fchip" data-day="todas">Todas</button>
+      </div>
+      <select class="fselect" id="statusFilter">
+        <option value="todos">Todos os status</option>
+        <option value="Confirmada">Confirmada</option>
+        <option value="Pendente">Pendente</option>
+        <option value="Cancelada">Cancelada</option>
+      </select>
+    </div>
+
+    <div class="admin-grid">
+      <div class="panel">
+        <h3>Reservas</h3>
+        <table class="res-table">
+          <thead><tr><th>Código</th><th>Horário</th><th>Cliente</th><th>Pessoas</th><th>Obs</th><th>Status</th><th></th></tr></thead>
+          <tbody id="resTableBody"></tbody>
+        </table>
+        <div class="no-results" id="noResults">Nenhuma reserva encontrada com esses filtros.</div>
+      </div>
+
+      <div class="panel">
+        <h3>Capacidade</h3>
+        <div class="cap-gauge">
+          <div class="cap-gauge-top">
+            <b id="capAgoraVal">—/120</b>
+            <span id="capAgoraPct">— ocupado agora</span>
+          </div>
+          <div class="cap-bar" id="capAgoraBar"><i style="width:0%"></i></div>
+        </div>
+        <div class="cap-hours" id="capHoras"></div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script>
+/* ---------------- Tema ---------------- */
+const root = document.documentElement;
+document.getElementById('themeToggle').addEventListener('click', () => {
+  const isDark = root.getAttribute('data-theme') === 'dark';
+  root.setAttribute('data-theme', isDark ? 'light' : 'dark');
+  document.getElementById('iconMoon').style.display = isDark ? 'none' : 'block';
+  document.getElementById('iconSun').style.display = isDark ? 'block' : 'none';
+});
+
+/* ---------------- View switch ---------------- */
+document.querySelectorAll('.switch-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.switch-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    document.querySelectorAll('main.view').forEach(v => v.classList.remove('active'));
+    document.getElementById(btn.dataset.view === 'cliente' ? 'viewCliente' : 'viewAdmin').classList.add('active');
+  });
+});
+
+/* ---------------- Capacidade do restaurante (cruzamento em tempo real) ---------------- */
+// Não trabalhamos mais por mesa: o limite é a capacidade total do salão.
+const CAPACIDADE_TOTAL = 120;
+const TIME_SLOTS = [1080,1110,1140,1170,1200,1230,1260,1290,1320]; // 18:00 até 22:00, de 30 em 30 min
+
+function toMin(hhmm){ const [h,m] = hhmm.split(':').map(Number); return h*60+m; }
+
+// Soma quantas pessoas já estão reservadas num intervalo de horário (ignora canceladas).
+function ocupacaoNoIntervalo(startMin, durMin, excludeIdx){
+  const endMin = startMin + durMin;
+  return RESERVAS.reduce((soma, r, idx) => {
+    if (idx === excludeIdx || r.status === 'Cancelada') return soma;
+    const rStart = toMin(r.hora);
+    const rEnd = rStart + (r.dur || defaultDuration(r.pessoas));
+    if (startMin < rEnd && endMin > rStart) return soma + r.pessoas;
+    return soma;
+  }, 0);
+}
+
+function vagasDisponiveis(startMin, durMin, excludeIdx){
+  return CAPACIDADE_TOTAL - ocupacaoNoIntervalo(startMin, durMin, excludeIdx);
+}
+
+// Se o horário pedido estiver lotado, procura o horário válido mais próximo (antes ou depois).
+function horarioMaisProximoComVaga(pessoas, aroundMin){
+  const dur = defaultDuration(pessoas);
+  const ordenado = [...TIME_SLOTS].sort((a,b) => Math.abs(a-aroundMin) - Math.abs(b-aroundMin));
+  for (const slot of ordenado){
+    if (vagasDisponiveis(slot, dur) >= pessoas) return slot;
+  }
+  return null;
+}
+
+/* ---------------- Widget: horário (duração calculada automaticamente) ---------------- */
+let selStart = 1200, selDur = 90;
+
+// Duração padrão por tamanho do grupo — o cliente não escolhe, o sistema decide.
+function defaultDuration(pessoas){
+  if (pessoas <= 4) return 90;
+  if (pessoas <= 6) return 120;
+  return 150; // 8+
+}
+
+document.querySelectorAll('#timeChips .chip').forEach(c => c.addEventListener('click', () => {
+  document.querySelectorAll('#timeChips .chip').forEach(x => x.classList.remove('active'));
+  c.classList.add('active'); selStart = Number(c.dataset.min);
+  refreshMap();
+}));
+document.getElementById('fPessoas').addEventListener('change', () => {
+  selDur = defaultDuration(Number(document.getElementById('fPessoas').value));
+  refreshMap();
+});
+
+// Quantidade de crianças e de PCD/cadeirantes — não afetam a busca, só acompanham a reserva pra equipe se preparar.
+function getQtdCriancas(){ return Number(document.getElementById('fCriancas').value); }
+function getQtdPcd(){ return Number(document.getElementById('fPcd').value); }
+
+function minToLabel(min){ const h = Math.floor(min/60), m = min%60; return String(h).padStart(2,'0')+':'+String(m).padStart(2,'0'); }
+function durLabel(min){ return min===60?'1h': min===90?'1h30': min===120?'2h':'2h30'; }
+
+function refreshMap(){
+  const pessoas = Number(document.getElementById('fPessoas').value);
+  selDur = defaultDuration(pessoas);
+  document.getElementById('resultBox').classList.remove('show');
+  document.getElementById('waPreview').classList.remove('show');
+}
+refreshMap();
+
+/* ---------------- Buscar mesa (o cliente não escolhe — o sistema cruza tudo e sugere) ---------------- */
+document.getElementById('btnBuscar').addEventListener('click', () => {
+  const loadingLine = document.getElementById('loadingLine');
+  loadingLine.classList.add('show');
+  loadingLine.querySelector('i').style.animation = 'none'; void loadingLine.offsetWidth;
+  loadingLine.querySelector('i').style.animation = 'load 0.8s ease-in-out';
+
+  document.getElementById('resultBox').classList.remove('show');
+  document.getElementById('waPreview').classList.remove('show');
+
+  setTimeout(() => {
+    loadingLine.classList.remove('show');
+    const pessoas = Number(document.getElementById('fPessoas').value);
+    selDur = defaultDuration(pessoas);
+    const vagas = vagasDisponiveis(selStart, selDur);
+
+    if (vagas >= pessoas){
+      document.getElementById('btnConfirmar').style.display = '';
+      document.getElementById('resTitle').textContent = 'Reserva disponível!';
+      document.getElementById('resSub').textContent = `${minToLabel(selStart)}–${minToLabel(selStart+selDur)} · ${pessoas} pessoas`;
+      document.getElementById('resultBox').classList.add('show');
+      window.__ultimaBusca = { start: selStart, dur: selDur, pessoas };
+      return;
+    }
+
+    // Sem vaga nesse horário: procura o horário mais próximo com capacidade
+    const alternativo = horarioMaisProximoComVaga(pessoas, selStart);
+    if (alternativo === null){
+      document.getElementById('btnConfirmar').style.display = 'none';
+      document.getElementById('resTitle').textContent = 'Sem vaga hoje pra esse tamanho de grupo';
+      document.getElementById('resSub').textContent = 'Quer entrar na lista de espera? Fale com a gente pelo WhatsApp.';
+      document.getElementById('resultBox').classList.add('show');
+      return;
+    }
+    document.getElementById('btnConfirmar').style.display = 'none';
+    document.getElementById('resTitle').textContent = `Nesse horário só temos ${Math.max(vagas,0)} lugares livres`;
+    document.getElementById('resSub').innerHTML = `Às <b>${minToLabel(alternativo)}</b> tem espaço pro seu grupo — <button class="row-action" id="btnUsarAlternativo" style="margin-left:4px;">usar esse horário</button>`;
+    document.getElementById('resultBox').classList.add('show');
+    document.getElementById('btnUsarAlternativo').addEventListener('click', () => {
+      selStart = alternativo;
+      document.querySelectorAll('#timeChips .chip').forEach(c => c.classList.toggle('active', Number(c.dataset.min) === alternativo));
+      document.getElementById('btnBuscar').click();
+    });
+  }, 850);
+});
+
+/* ---------------- Confirmar + prévia WhatsApp ---------------- */
+document.getElementById('btnConfirmar').addEventListener('click', () => {
+  const nomeInput = document.getElementById('fNome');
+  const nomeField = document.getElementById('fNomeField');
+  const nomeHint = document.getElementById('nomeHint');
+  const waInput = document.getElementById('fWa');
+  const waField = document.getElementById('fWaField');
+  const waHint = document.getElementById('waHint');
+
+  if (!nomeInput.value.trim()){
+    nomeField.classList.add('error');
+    nomeHint.classList.add('show');
+    nomeInput.focus();
+    return;
+  }
+  nomeField.classList.remove('error');
+  nomeHint.classList.remove('show');
+
+  if (!waInput.value.trim()){
+    waField.classList.add('error');
+    waHint.textContent = 'Precisamos do seu WhatsApp pra confirmar a reserva 🙂';
+    waHint.classList.add('error-msg','show');
+    waInput.focus();
+    return;
+  }
+  waField.classList.remove('error');
+  waHint.classList.remove('error-msg','show');
+  waHint.textContent = "Usamos esse número só pra confirmar sua reserva e avisar de qualquer mudança.";
+
+  const primeiroNome = nomeInput.value.trim().split(' ')[0];
+  const dataVal = document.getElementById('fData').value;
+  const [y,m,d] = dataVal.split('-');
+  const detalhes = document.getElementById('resSub').textContent;
+  const codigo = gerarCodigo();
+  const qtdCriancas = getQtdCriancas();
+  const qtdPcd = getQtdPcd();
+  const obsPartes = [];
+  if (qtdCriancas > 0) obsPartes.push(`${qtdCriancas} criança${qtdCriancas>1?'s':''} 👶`);
+  if (qtdPcd > 0) obsPartes.push(`${qtdPcd} PCD/cadeirante${qtdPcd>1?'s':''} ♿`);
+  const obsLinha = obsPartes.length ? `<br><br>Anotamos aqui: ${obsPartes.join(' · ')}` : '';
+  const msg = `Fechou, <b>${primeiroNome}</b>! <b>Sua mesa tá garantida ✓</b><br><br>Código: <b>${codigo}</b><br>${d}/${m} · ${detalhes}${obsLinha}<br><br>Se mudar de ideia, cancele pelo botão abaixo e a mesa é liberada na hora. Te esperamos na Caminhoneta!`;
+  document.getElementById('waMsg').innerHTML = msg;
+  document.getElementById('waPreview').classList.add('show');
+
+  // Cria a reserva de verdade e já reflete no painel administrativo
+  const pessoasVal = Number(document.getElementById('fPessoas').value);
+  RESERVAS.push({
+    hora: minToLabel(selStart),
+    dur: selDur,
+    cliente: nomeInput.value.trim(),
+    pessoas: pessoasVal,
+    status: 'Confirmada',
+    dia: 'hoje',
+    telefone: onlyDigits(waInput.value),
+    codigo: codigo,
+    criancas: qtdCriancas,
+    pcd: qtdPcd,
+  });
+  const novaIdx = RESERVAS.length - 1;
+  renderResTable();
+  renderCapacidade();
+
+  // Botões interativos simulados (o mesmo comportamento que os botões reais do WhatsApp Business acionariam)
+  const waButtons = document.getElementById('waButtons');
+  waButtons.innerHTML = `<button class="wa-btn wa-btn-danger" id="waBtnCancelar">Cancelar minha reserva</button>`;
+  document.getElementById('waBtnCancelar').addEventListener('click', () => {
+    RESERVAS[novaIdx].status = 'Cancelada';
+    renderResTable();
+    renderCapacidade();
+    waButtons.innerHTML = `<button class="wa-btn" disabled>Reserva cancelada e mesa liberada ✓</button>`;
+  });
+});
+
+/* ==================== ADMIN ==================== */
+const RESERVAS = [
+  {hora:'19:00', dur:90,  cliente:'Marina Ferreira', pessoas:2, status:'Confirmada', dia:'hoje', telefone:'11912340001', codigo:'#4021', criancas:1, pcd:0},
+  {hora:'19:00', dur:90,  cliente:'Bruno Castelo', pessoas:4, status:'Confirmada', dia:'hoje', telefone:'11912340002', codigo:'#4022', criancas:0, pcd:0},
+  {hora:'19:30', dur:120, cliente:'Grupo Vinhedo Corp', pessoas:6, status:'Confirmada', dia:'hoje', telefone:'11912340003', codigo:'#4023', criancas:0, pcd:0},
+  {hora:'19:30', dur:90,  cliente:'Ana Beatriz Lima', pessoas:4, status:'Pendente', dia:'hoje', telefone:'11912340004', codigo:'#4024', criancas:0, pcd:0},
+  {hora:'20:00', dur:120, cliente:'Diego & Cia', pessoas:6, status:'Confirmada', dia:'hoje', telefone:'11912340005', codigo:'#4025', criancas:0, pcd:0},
+  {hora:'20:00', dur:90,  cliente:'Rafaela Souto', pessoas:2, status:'Confirmada', dia:'hoje', telefone:'11912340006', codigo:'#4026', criancas:0, pcd:1},
+  {hora:'20:30', dur:90,  cliente:'Thiago Nascimento', pessoas:4, status:'Cancelada', dia:'hoje', telefone:'11912340007', codigo:'#4027', criancas:0, pcd:0},
+  {hora:'21:00', dur:90,  cliente:'Camila Duarte', pessoas:3, status:'Pendente', dia:'amanha', telefone:'11912340008', codigo:'#4028', criancas:0, pcd:0},
+  {hora:'21:00', dur:90,  cliente:'Fábio Marchetti', pessoas:4, status:'Confirmada', dia:'amanha', telefone:'11912340009', codigo:'#4029', criancas:2, pcd:0},
+];
+let proximoCodigo = 4030;
+function gerarCodigo(){ return '#' + (proximoCodigo++); }
+
+function obsIcones(r){
+  let html = '';
+  if (r.criancas > 0) html += `<span title="${r.criancas} criança(s)">👶 ${r.criancas}</span> `;
+  if (r.pcd > 0) html += `<span title="${r.pcd} PCD/cadeirante(s)">♿ ${r.pcd}</span>`;
+  return html || '<span style="color:var(--text-faint)">—</span>';
+}
+
+function renderResTable(){
+  const search = document.getElementById('adminSearch').value.toLowerCase().trim();
+  const day = document.querySelector('#dayChips .fchip.active').dataset.day;
+  const status = document.getElementById('statusFilter').value;
+
+  const filtradas = RESERVAS.filter(r => {
+    if (day !== 'todas' && r.dia !== day) return false;
+    if (status !== 'todos' && r.status !== status) return false;
+    if (search && !(r.cliente.toLowerCase().includes(search) || r.codigo.toLowerCase().includes(search))) return false;
+    return true;
+  });
+
+  const tbody = document.getElementById('resTableBody');
+  tbody.innerHTML = filtradas.map((r,i) => `
+    <tr class="${r.status==='Cancelada'?'row-cancelada':''}" data-idx="${RESERVAS.indexOf(r)}">
+      <td style="font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--text-faint);">${r.codigo}</td>
+      <td>${r.hora}</td><td>${r.cliente}</td><td>${r.pessoas}</td><td>${obsIcones(r)}</td>
+      <td><span class="badge badge-${r.status.toLowerCase()}">${r.status}</span></td>
+      <td>${r.status!=='Cancelada' ? `<button class="row-action" data-action="cancelar">Cancelar</button>` : ''}</td>
+    </tr>`).join('');
+  document.getElementById('noResults').classList.toggle('show', filtradas.length===0);
+
+  tbody.querySelectorAll('.row-action').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const idx = Number(e.target.closest('tr').dataset.idx);
+      RESERVAS[idx].status = 'Cancelada';
+      renderResTable();
+      renderCapacidade();
+    });
+  });
+}
+
+document.getElementById('adminSearch').addEventListener('input', renderResTable);
+document.getElementById('statusFilter').addEventListener('change', renderResTable);
+document.querySelectorAll('#dayChips .fchip').forEach(c => c.addEventListener('click', () => {
+  document.querySelectorAll('#dayChips .fchip').forEach(x => x.classList.remove('active'));
+  c.classList.add('active'); renderResTable();
+}));
+renderResTable();
+
+/* ---------------- Utilitário mantido: usado na criação da reserva ---------------- */
+function onlyDigits(str){ return str.replace(/\D/g,''); }
+
+/* Painel de Capacidade do admin: ocupação "agora" e por horário (0 a 120 lugares) */
+const AGORA_MIN = 1200; // 20:00 fixo pra demo
+
+function renderCapacidade(){
+  const agora = ocupacaoNoIntervalo(AGORA_MIN, 1);
+  const pctAgora = Math.min(100, Math.round((agora / CAPACIDADE_TOTAL) * 100));
+  document.getElementById('capAgoraVal').textContent = `${agora}/${CAPACIDADE_TOTAL}`;
+  document.getElementById('capAgoraPct').textContent = `${pctAgora}% ocupado agora`;
+  const bar = document.getElementById('capAgoraBar');
+  bar.querySelector('i').style.width = pctAgora + '%';
+  bar.classList.toggle('full', pctAgora >= 90);
+
+  document.getElementById('statLugaresAgora').textContent = `${agora}/${CAPACIDADE_TOTAL}`;
+  document.getElementById('statLugaresPct').textContent = `${pctAgora}% de ocupação`;
+
+  document.getElementById('capHoras').innerHTML = TIME_SLOTS.map(slot => {
+    const ocupado = ocupacaoNoIntervalo(slot, 30); // fatia de 30min só pra visão geral do dia
+    const pct = Math.min(100, Math.round((ocupado / CAPACIDADE_TOTAL) * 100));
+    return `<div class="cap-hour-row">
+      <span>${minToLabel(slot)}</span>
+      <div class="cap-hour-bar"><i class="${pct>=90?'full':''}" style="width:${pct}%"></i></div>
+      <span>${ocupado}/${CAPACIDADE_TOTAL}</span>
+    </div>`;
+  }).join('');
+}
+renderCapacidade();
+</script>
+
+</body>
+</html>

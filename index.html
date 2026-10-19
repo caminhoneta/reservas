@@ -141,6 +141,13 @@
   .wa-btn-danger{ color:var(--danger); }
   .wa-btn:disabled{ opacity:.4; cursor:default; }
 
+  .qr-box{ display:flex; align-items:center; gap:14px; margin-top:12px; padding:12px; border:1px dashed var(--border-strong); border-radius:10px; background:var(--surface); }
+  .qr-ph{ width:64px; height:64px; flex-shrink:0; border-radius:6px; background:
+    conic-gradient(from 90deg at 50% 50%, var(--bone) 0 25%, transparent 0 50%, var(--bone) 0 75%, transparent 0) 0 0/16px 16px; opacity:.85; }
+  .qr-box p{ font-size:11.5px; line-height:1.5; color:var(--text-muted); }
+  .qr-box p b{ color:var(--bone-bright); display:block; margin-bottom:2px; font-size:12px; }
+  .help-link{ display:inline-block; margin-top:10px; font-size:11.5px; color:var(--text-faint); text-decoration:underline; }
+  .help-link:hover{ color:var(--bone-bright); }
   footer{ position:relative; z-index:2; border-top:1px solid var(--border); padding:26px clamp(20px,5vw,64px);
     display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; }
   footer .f-brand{ font-family:'Bevan',serif; font-size:13px; color:var(--text-muted); text-transform:uppercase; letter-spacing:.3px; }
@@ -241,13 +248,6 @@
     </button>
   </div>
 </header>
-
-<div class="view-switch">
-  <div class="switch-pill">
-    <button class="switch-btn active" data-view="cliente">Experiência do Cliente</button>
-    <button class="switch-btn" data-view="admin">Painel Administrativo</button>
-  </div>
-</div>
 
 <!-- ===================== VIEW CLIENTE ===================== -->
 <main class="view active" id="viewCliente">
@@ -358,14 +358,14 @@
 
         <div class="wa-preview" id="waPreview">
           <div class="wa-card">
-            <div class="wa-head"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/></svg>Prévia da notificação</div>
+            <div class="wa-head"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/></svg>Reserva confirmada</div>
             <div class="wa-bubble">
               <div class="wa-msg" id="waMsg"></div>
-              <div class="wa-meta">enviado agora · ✓✓</div>
+              <div class="qr-box"><div class="qr-ph"></div><p><b>QR Code de check-in</b>Mostre na chegada. Guarde o código da reserva: é com ele que você altera ou cancela.</p></div>
               <div class="wa-buttons" id="waButtons"></div>
             </div>
           </div>
-          <div class="field-hint" style="margin-top:8px;">Protótipo dos botões interativos do WhatsApp Business — a pessoa cancela sem sair da conversa. Funcionamento real depende da integração da API (etapa 13).</div>
+          <div class="field-hint" style="margin-top:8px;">Protótipo: no sistema real o cliente também recebe esse resumo por e-mail e acessa "Minha reserva" pelo código. <a class="help-link" href="https://wa.me/5511999999999" target="_blank" rel="noopener" style="margin-top:0;">Precisa de ajuda? Fale com a gente</a></div>
         </div>
       </div>
     </div>
@@ -373,68 +373,8 @@
 
   <footer>
     <div class="f-brand">Caminhoneta · Burger y Parrilla</div>
-    <div class="f-note">PÁGINA TESTE · IDENTIDADE v0.3</div>
+    <div class="f-note">PROTÓTIPO · RESERVAS</div>
   </footer>
-</main>
-
-<!-- ===================== VIEW ADMIN ===================== -->
-<main class="view" id="viewAdmin">
-  <div class="admin-wrap">
-    <div class="admin-head">
-      <div>
-        <h2>Painel Administrativo</h2>
-        <div class="live-tag"><span class="live-dot"></span>Atualizando automaticamente</div>
-      </div>
-    </div>
-
-    <div class="stats-grid">
-      <div class="stat-card"><div class="lbl">Reservas hoje</div><div class="val">18</div><div class="delta up">+4 vs. sexta passada</div></div>
-      <div class="stat-card"><div class="lbl">Lugares ocupados agora</div><div class="val" id="statLugaresAgora">—/120</div><div class="delta" id="statLugaresPct">—</div></div>
-      <div class="stat-card"><div class="lbl">Lista de espera</div><div class="val">3</div><div class="delta">grupos aguardando</div></div>
-      <div class="stat-card"><div class="lbl">Confirmação WhatsApp</div><div class="val">100%</div><div class="delta up">enviadas automaticamente</div></div>
-    </div>
-
-    <div class="filters-bar">
-      <div class="search-box">
-        <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
-        <input type="text" id="adminSearch" placeholder="Buscar por cliente ou código…">
-      </div>
-      <div class="filter-chips" id="dayChips">
-        <button class="fchip active" data-day="hoje">Hoje</button>
-        <button class="fchip" data-day="amanha">Amanhã</button>
-        <button class="fchip" data-day="todas">Todas</button>
-      </div>
-      <select class="fselect" id="statusFilter">
-        <option value="todos">Todos os status</option>
-        <option value="Confirmada">Confirmada</option>
-        <option value="Pendente">Pendente</option>
-        <option value="Cancelada">Cancelada</option>
-      </select>
-    </div>
-
-    <div class="admin-grid">
-      <div class="panel">
-        <h3>Reservas</h3>
-        <table class="res-table">
-          <thead><tr><th>Código</th><th>Horário</th><th>Cliente</th><th>Pessoas</th><th>Obs</th><th>Status</th><th></th></tr></thead>
-          <tbody id="resTableBody"></tbody>
-        </table>
-        <div class="no-results" id="noResults">Nenhuma reserva encontrada com esses filtros.</div>
-      </div>
-
-      <div class="panel">
-        <h3>Capacidade</h3>
-        <div class="cap-gauge">
-          <div class="cap-gauge-top">
-            <b id="capAgoraVal">—/120</b>
-            <span id="capAgoraPct">— ocupado agora</span>
-          </div>
-          <div class="cap-bar" id="capAgoraBar"><i style="width:0%"></i></div>
-        </div>
-        <div class="cap-hours" id="capHoras"></div>
-      </div>
-    </div>
-  </div>
 </main>
 
 <script>
@@ -445,16 +385,6 @@ document.getElementById('themeToggle').addEventListener('click', () => {
   root.setAttribute('data-theme', isDark ? 'light' : 'dark');
   document.getElementById('iconMoon').style.display = isDark ? 'none' : 'block';
   document.getElementById('iconSun').style.display = isDark ? 'block' : 'none';
-});
-
-/* ---------------- View switch ---------------- */
-document.querySelectorAll('.switch-btn').forEach(btn => {
-  btn.addEventListener('click', () => {
-    document.querySelectorAll('.switch-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    document.querySelectorAll('main.view').forEach(v => v.classList.remove('active'));
-    document.getElementById(btn.dataset.view === 'cliente' ? 'viewCliente' : 'viewAdmin').classList.add('active');
-  });
 });
 
 /* ---------------- Capacidade do restaurante (cruzamento em tempo real) ---------------- */
@@ -611,7 +541,7 @@ document.getElementById('btnConfirmar').addEventListener('click', () => {
   if (qtdCriancas > 0) obsPartes.push(`${qtdCriancas} criança${qtdCriancas>1?'s':''} 👶`);
   if (qtdPcd > 0) obsPartes.push(`${qtdPcd} PCD/cadeirante${qtdPcd>1?'s':''} ♿`);
   const obsLinha = obsPartes.length ? `<br><br>Anotamos aqui: ${obsPartes.join(' · ')}` : '';
-  const msg = `Fechou, <b>${primeiroNome}</b>! <b>Sua mesa tá garantida 🔔</b><br><br>Código: <b>${codigo}</b><br>${d}/${m} · ${detalhes}${obsLinha}<br><br>Qualquer imprevisto, é só usar os botões abaixo. Te esperamos na Caminhoneta!`;
+  const msg = `Fechou, <b>${primeiroNome}</b>! <b>Sua mesa tá garantida ✓</b><br><br>Código: <b>${codigo}</b><br>${d}/${m} · ${detalhes}${obsLinha}<br><br>Se mudar de ideia, cancele pelo botão abaixo e a mesa é liberada na hora. Te esperamos na Caminhoneta!`;
   document.getElementById('waMsg').innerHTML = msg;
   document.getElementById('waPreview').classList.add('show');
 
@@ -630,114 +560,34 @@ document.getElementById('btnConfirmar').addEventListener('click', () => {
     pcd: qtdPcd,
   });
   const novaIdx = RESERVAS.length - 1;
-  renderResTable();
-  renderCapacidade();
 
   // Botões interativos simulados (o mesmo comportamento que os botões reais do WhatsApp Business acionariam)
   const waButtons = document.getElementById('waButtons');
-  waButtons.innerHTML = `<button class="wa-btn" id="waBtnManter">👍 Tudo certo</button><button class="wa-btn wa-btn-danger" id="waBtnCancelar">❌ Cancelar reserva</button>`;
-  document.getElementById('waBtnManter').addEventListener('click', (e) => {
-    waButtons.innerHTML = `<button class="wa-btn" disabled>👍 Combinado, até lá!</button>`;
-  });
+  waButtons.innerHTML = `<button class="wa-btn wa-btn-danger" id="waBtnCancelar">Cancelar minha reserva</button>`;
   document.getElementById('waBtnCancelar').addEventListener('click', () => {
     RESERVAS[novaIdx].status = 'Cancelada';
-    renderResTable();
-    renderCapacidade();
-    waButtons.innerHTML = `<button class="wa-btn" disabled>Reserva cancelada por aqui mesmo ✓</button>`;
+    waButtons.innerHTML = `<button class="wa-btn" disabled>Reserva cancelada e mesa liberada ✓</button>`;
   });
 });
 
 /* ==================== ADMIN ==================== */
 const RESERVAS = [
-  {hora:'19:00', dur:90,  cliente:'Marina Ferreira', pessoas:2, status:'Confirmada', dia:'hoje', telefone:'11912340001', codigo:'#4021', criancas:1, pcd:0},
-  {hora:'19:00', dur:90,  cliente:'Bruno Castelo', pessoas:4, status:'Confirmada', dia:'hoje', telefone:'11912340002', codigo:'#4022', criancas:0, pcd:0},
-  {hora:'19:30', dur:120, cliente:'Grupo Vinhedo Corp', pessoas:6, status:'Confirmada', dia:'hoje', telefone:'11912340003', codigo:'#4023', criancas:0, pcd:0},
-  {hora:'19:30', dur:90,  cliente:'Ana Beatriz Lima', pessoas:4, status:'Pendente', dia:'hoje', telefone:'11912340004', codigo:'#4024', criancas:0, pcd:0},
-  {hora:'20:00', dur:120, cliente:'Diego & Cia', pessoas:6, status:'Confirmada', dia:'hoje', telefone:'11912340005', codigo:'#4025', criancas:0, pcd:0},
-  {hora:'20:00', dur:90,  cliente:'Rafaela Souto', pessoas:2, status:'Confirmada', dia:'hoje', telefone:'11912340006', codigo:'#4026', criancas:0, pcd:1},
-  {hora:'20:30', dur:90,  cliente:'Thiago Nascimento', pessoas:4, status:'Cancelada', dia:'hoje', telefone:'11912340007', codigo:'#4027', criancas:0, pcd:0},
-  {hora:'21:00', dur:90,  cliente:'Camila Duarte', pessoas:3, status:'Pendente', dia:'amanha', telefone:'11912340008', codigo:'#4028', criancas:0, pcd:0},
-  {hora:'21:00', dur:90,  cliente:'Fábio Marchetti', pessoas:4, status:'Confirmada', dia:'amanha', telefone:'11912340009', codigo:'#4029', criancas:2, pcd:0},
+  {hora:'19:00', dur:90,  cliente:'—', pessoas:2, status:'Confirmada', dia:'hoje', telefone:'', codigo:'#4021', criancas:1, pcd:0},
+  {hora:'19:00', dur:90,  cliente:'—', pessoas:4, status:'Confirmada', dia:'hoje', telefone:'', codigo:'#4022', criancas:0, pcd:0},
+  {hora:'19:30', dur:120, cliente:'—', pessoas:6, status:'Confirmada', dia:'hoje', telefone:'', codigo:'#4023', criancas:0, pcd:0},
+  {hora:'19:30', dur:90,  cliente:'—', pessoas:4, status:'Pendente', dia:'hoje', telefone:'', codigo:'#4024', criancas:0, pcd:0},
+  {hora:'20:00', dur:120, cliente:'—', pessoas:6, status:'Confirmada', dia:'hoje', telefone:'', codigo:'#4025', criancas:0, pcd:0},
+  {hora:'20:00', dur:90,  cliente:'—', pessoas:2, status:'Confirmada', dia:'hoje', telefone:'', codigo:'#4026', criancas:0, pcd:1},
+  {hora:'20:30', dur:90,  cliente:'—', pessoas:4, status:'Cancelada', dia:'hoje', telefone:'', codigo:'#4027', criancas:0, pcd:0},
+  {hora:'21:00', dur:90,  cliente:'—', pessoas:3, status:'Pendente', dia:'amanha', telefone:'', codigo:'#4028', criancas:0, pcd:0},
+  {hora:'21:00', dur:90,  cliente:'—', pessoas:4, status:'Confirmada', dia:'amanha', telefone:'', codigo:'#4029', criancas:2, pcd:0},
 ];
 let proximoCodigo = 4030;
 function gerarCodigo(){ return '#' + (proximoCodigo++); }
 
-function obsIcones(r){
-  let html = '';
-  if (r.criancas > 0) html += `<span title="${r.criancas} criança(s)">👶 ${r.criancas}</span> `;
-  if (r.pcd > 0) html += `<span title="${r.pcd} PCD/cadeirante(s)">♿ ${r.pcd}</span>`;
-  return html || '<span style="color:var(--text-faint)">—</span>';
-}
-
-function renderResTable(){
-  const search = document.getElementById('adminSearch').value.toLowerCase().trim();
-  const day = document.querySelector('#dayChips .fchip.active').dataset.day;
-  const status = document.getElementById('statusFilter').value;
-
-  const filtradas = RESERVAS.filter(r => {
-    if (day !== 'todas' && r.dia !== day) return false;
-    if (status !== 'todos' && r.status !== status) return false;
-    if (search && !(r.cliente.toLowerCase().includes(search) || r.codigo.toLowerCase().includes(search))) return false;
-    return true;
-  });
-
-  const tbody = document.getElementById('resTableBody');
-  tbody.innerHTML = filtradas.map((r,i) => `
-    <tr class="${r.status==='Cancelada'?'row-cancelada':''}" data-idx="${RESERVAS.indexOf(r)}">
-      <td style="font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--text-faint);">${r.codigo}</td>
-      <td>${r.hora}</td><td>${r.cliente}</td><td>${r.pessoas}</td><td>${obsIcones(r)}</td>
-      <td><span class="badge badge-${r.status.toLowerCase()}">${r.status}</span></td>
-      <td>${r.status!=='Cancelada' ? `<button class="row-action" data-action="cancelar">Cancelar</button>` : ''}</td>
-    </tr>`).join('');
-  document.getElementById('noResults').classList.toggle('show', filtradas.length===0);
-
-  tbody.querySelectorAll('.row-action').forEach(btn => {
-    btn.addEventListener('click', (e) => {
-      const idx = Number(e.target.closest('tr').dataset.idx);
-      RESERVAS[idx].status = 'Cancelada';
-      renderResTable();
-      renderCapacidade();
-    });
-  });
-}
-
-document.getElementById('adminSearch').addEventListener('input', renderResTable);
-document.getElementById('statusFilter').addEventListener('change', renderResTable);
-document.querySelectorAll('#dayChips .fchip').forEach(c => c.addEventListener('click', () => {
-  document.querySelectorAll('#dayChips .fchip').forEach(x => x.classList.remove('active'));
-  c.classList.add('active'); renderResTable();
-}));
-renderResTable();
-
 /* ---------------- Utilitário mantido: usado na criação da reserva ---------------- */
 function onlyDigits(str){ return str.replace(/\D/g,''); }
 
-/* Painel de Capacidade do admin: ocupação "agora" e por horário (0 a 120 lugares) */
-const AGORA_MIN = 1200; // 20:00 fixo pra demo
-
-function renderCapacidade(){
-  const agora = ocupacaoNoIntervalo(AGORA_MIN, 1);
-  const pctAgora = Math.min(100, Math.round((agora / CAPACIDADE_TOTAL) * 100));
-  document.getElementById('capAgoraVal').textContent = `${agora}/${CAPACIDADE_TOTAL}`;
-  document.getElementById('capAgoraPct').textContent = `${pctAgora}% ocupado agora`;
-  const bar = document.getElementById('capAgoraBar');
-  bar.querySelector('i').style.width = pctAgora + '%';
-  bar.classList.toggle('full', pctAgora >= 90);
-
-  document.getElementById('statLugaresAgora').textContent = `${agora}/${CAPACIDADE_TOTAL}`;
-  document.getElementById('statLugaresPct').textContent = `${pctAgora}% de ocupação`;
-
-  document.getElementById('capHoras').innerHTML = TIME_SLOTS.map(slot => {
-    const ocupado = ocupacaoNoIntervalo(slot, 30); // fatia de 30min só pra visão geral do dia
-    const pct = Math.min(100, Math.round((ocupado / CAPACIDADE_TOTAL) * 100));
-    return `<div class="cap-hour-row">
-      <span>${minToLabel(slot)}</span>
-      <div class="cap-hour-bar"><i class="${pct>=90?'full':''}" style="width:${pct}%"></i></div>
-      <span>${ocupado}/${CAPACIDADE_TOTAL}</span>
-    </div>`;
-  }).join('');
-}
-renderCapacidade();
 </script>
 
 </body>
