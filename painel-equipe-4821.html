@@ -221,8 +221,35 @@
     .stats-grid{ grid-template-columns:1fr; }
     table.res-table{ font-size:11px; }
     .btn-fale span{ display:none; }
+    .btn-minha span{ font-size:11.5px; }
+    .btn-minha{ padding:10px 12px; }
     .btn-fale{ padding:10px; }
   }
+
+  .btn-minha{ display:flex; align-items:center; gap:8px; padding:10px 16px; border-radius:24px; border:1px solid var(--bone); background:transparent; color:var(--text); font-family:'Inter',sans-serif; font-weight:700; font-size:12px; cursor:pointer; transition:all .2s ease; }
+  .btn-minha svg{ width:15px; height:15px; stroke:var(--spark); flex-shrink:0; }
+  .btn-minha:hover{ background:var(--bone-bright); color:#0B0B0A; }
+  .btn-minha:hover svg{ stroke:#0B0B0A; }
+  .modal-bg{ position:fixed; inset:0; background:rgba(0,0,0,.65); display:none; align-items:center; justify-content:center; padding:16px; z-index:100; }
+  .modal-bg.show{ display:flex; animation:fadeIn .2s ease; }
+  @keyframes fadeIn{ from{opacity:0} to{opacity:1} }
+  .modal{ width:100%; max-width:420px; max-height:92vh; overflow:auto; background:var(--surface); border:1px solid var(--border-strong); border-radius:16px; padding:24px; box-shadow:var(--shadow); position:relative; }
+  .modal-close{ position:absolute; top:12px; right:14px; background:none; border:none; color:var(--text-faint); font-size:22px; cursor:pointer; line-height:1; }
+  .modal-close:hover{ color:var(--text); }
+  .modal .field{ margin-bottom:10px; }
+  .modal-btn{ width:100%; padding:13px; border-radius:10px; border:none; background:var(--bone-bright); color:#0B0B0A; font-family:'Inter',sans-serif; font-weight:700; font-size:13px; cursor:pointer; margin-top:4px; }
+  .modal-btn.sec{ background:transparent; border:1px solid var(--border-strong); color:var(--text); }
+  .modal-btn.danger{ background:transparent; border:1px solid var(--danger); color:var(--danger); }
+  .modal-btn:disabled{ opacity:.45; cursor:default; }
+  .mr-erro{ color:var(--danger); font-size:12px; margin:6px 2px 0; display:none; }
+  .mr-erro.show{ display:block; }
+  .mr-card{ border:1px solid var(--border); background:var(--surface-2); border-radius:12px; padding:16px; margin-bottom:12px; }
+  .mr-card .cod{ font-family:'JetBrains Mono',monospace; color:var(--spark); font-size:13px; font-weight:700; }
+  .mr-card .linha{ font-size:13px; margin-top:6px; color:var(--text); }
+  .mr-card .st{ display:inline-block; margin-top:10px; font-size:10.5px; font-weight:700; letter-spacing:.8px; text-transform:uppercase; padding:3px 9px; border-radius:20px; background:rgba(240,201,74,.14); color:var(--spark); }
+  .mr-card .st.cancelada{ background:rgba(197,107,84,.15); color:var(--danger); }
+  .mr-conf{ font-size:13px; color:var(--text); margin-bottom:10px; line-height:1.5; }
+  .mr-linha-btns{ display:grid; grid-template-columns:1fr 1fr; gap:8px; }
 </style>
 </head>
 <body>
@@ -235,6 +262,10 @@
     <div class="brand-name">Caminhoneta<span>Burger · Parrilla</span></div>
   </div>
   <div class="header-actions">
+    <button class="btn-minha" id="btnMinha" type="button">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+      <span>Minha reserva</span>
+    </button>
     <a class="btn-fale" href="https://wa.me/5511999999999" target="_blank" rel="noopener">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/></svg>
       <span>Fale com a gente</span>
@@ -441,6 +472,27 @@
   </div>
 </main>
 
+<div class="modal-bg" id="mrBg" role="dialog" aria-modal="true" aria-labelledby="mrTitulo">
+  <div class="modal">
+    <button class="modal-close" id="mrFechar" aria-label="Fechar">×</button>
+    <div id="mrBusca">
+      <div class="widget-title" id="mrTitulo">Minha reserva</div>
+      <div class="widget-sub">Digite o código da reserva e o WhatsApp que você usou pra reservar.</div>
+      <div class="field"><label>Código da reserva</label><input type="text" id="mrCodigo" placeholder="#4030" autocomplete="off"></div>
+      <div class="field"><label>WhatsApp</label><input type="tel" id="mrZap" placeholder="(11) 99999-9999" autocomplete="tel"></div>
+      <div class="mr-erro" id="mrErro"></div>
+      <button class="modal-btn" id="mrBuscar" type="button">Buscar reserva</button>
+      <div class="field-hint" style="margin-top:10px;">Perdeu o código? <a href="https://wa.me/5511999999999" target="_blank" rel="noopener" style="color:var(--spark)">Fale com a gente</a> que a gente acha pra você.</div>
+    </div>
+    <div id="mrResultado" style="display:none;">
+      <div class="widget-title">Sua reserva</div>
+      <div class="widget-sub">Confira os dados abaixo.</div>
+      <div class="mr-card" id="mrCard"></div>
+      <div id="mrAcoes"></div>
+    </div>
+  </div>
+</div>
+
 <script>
 /* ---------------- Tema ---------------- */
 const root = document.documentElement;
@@ -529,8 +581,48 @@ function refreshMap(){
 }
 refreshMap();
 
+/* ---------------- Bloqueio de datas e horários passados ---------------- */
+function isoLocal(d){ return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+function aplicarBloqueioPassado(){
+  const inp = document.getElementById('fData');
+  const agora = new Date();
+  const hoje = isoLocal(agora);
+  inp.min = hoje;
+  if (!inp.value || inp.value < hoje) inp.value = hoje;
+  const minAgora = agora.getHours()*60 + agora.getMinutes();
+  const chips = [...document.querySelectorAll('#timeChips .chip')];
+  const ehHoje = inp.value === hoje;
+  chips.forEach(c => {
+    const passou = ehHoje && Number(c.dataset.min) <= minAgora;
+    c.disabled = passou;
+    c.style.opacity = passou ? '.35' : '';
+    c.style.cursor = passou ? 'not-allowed' : '';
+    c.title = passou ? 'Esse horário já passou' : '';
+  });
+  const livres = chips.filter(c => !c.disabled);
+  if (!livres.length){            // acabou o expediente de hoje: pula para amanhã
+    const amanha = new Date(agora); amanha.setDate(amanha.getDate()+1);
+    inp.value = isoLocal(amanha);
+    return aplicarBloqueioPassado();
+  }
+  const ativo = chips.find(c => c.classList.contains('active'));
+  if (!ativo || ativo.disabled){
+    chips.forEach(c => c.classList.remove('active'));
+    livres[0].classList.add('active');
+    selStart = Number(livres[0].dataset.min);
+  }
+  refreshMap();
+}
+document.getElementById('fData').addEventListener('change', aplicarBloqueioPassado);
+document.getElementById('fData').addEventListener('input', () => {
+  const inp = document.getElementById('fData');
+  if (inp.value && inp.value < isoLocal(new Date())) aplicarBloqueioPassado();
+});
+aplicarBloqueioPassado();
+
 /* ---------------- Buscar mesa (o cliente não escolhe — o sistema cruza tudo e sugere) ---------------- */
 document.getElementById('btnBuscar').addEventListener('click', () => {
+  aplicarBloqueioPassado();
   const loadingLine = document.getElementById('loadingLine');
   loadingLine.classList.add('show');
   loadingLine.querySelector('i').style.animation = 'none'; void loadingLine.offsetWidth;
@@ -632,7 +724,13 @@ document.getElementById('btnConfirmar').addEventListener('click', () => {
     codigo: codigo,
     criancas: qtdCriancas,
     pcd: qtdPcd,
+    data: dataVal,
   });
+  if (typeof alterandoCodigo !== 'undefined' && alterandoCodigo){
+    const antiga = RESERVAS.find(x => x.codigo === alterandoCodigo);
+    if (antiga) antiga.status = 'Cancelada';
+    alterandoCodigo = null;
+  }
   const novaIdx = RESERVAS.length - 1;
   renderResTable();
   renderCapacidade();
@@ -739,6 +837,91 @@ function renderCapacidade(){
   }).join('');
 }
 renderCapacidade();
+
+/* ---------------- Minha reserva (consultar / alterar / cancelar) ---------------- */
+let alterandoCodigo = null;
+/*ADMIN-HOOK*/
+window.onReservasChange = () => { renderResTable(); renderCapacidade(); };
+/*/ADMIN-HOOK*/
+function reservasMudaram(){ if (window.onReservasChange) window.onReservasChange(); }
+(function(){
+  const bg = document.getElementById('mrBg');
+  const busca = document.getElementById('mrBusca');
+  const res = document.getElementById('mrResultado');
+  const erro = document.getElementById('mrErro');
+  const iCod = document.getElementById('mrCodigo');
+  const iZap = document.getElementById('mrZap');
+  const dig = v => String(v||'').replace(/\D/g,'');
+  const norm = c => '#' + String(c||'').replace(/\D/g,'');
+  const esc = t => String(t).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+  function abrir(){ busca.style.display=''; res.style.display='none'; erro.classList.remove('show'); bg.classList.add('show'); setTimeout(()=>iCod.focus(),50); }
+  function toast(t){
+    let el = document.getElementById('toastMr');
+    if (!el){ el = document.createElement('div'); el.id='toastMr';
+      el.style.cssText='position:fixed;left:50%;bottom:24px;transform:translateX(-50%);max-width:92vw;background:var(--surface);color:var(--text);border:1px solid var(--bone);border-radius:12px;padding:12px 16px;font-size:13px;z-index:120;box-shadow:var(--shadow)';
+      document.body.appendChild(el); }
+    el.textContent = t; el.style.display='block'; clearTimeout(el._t); el._t = setTimeout(()=>{ el.style.display='none'; }, 6000);
+  }
+  function fechar(){ bg.classList.remove('show'); }
+  document.getElementById('btnMinha').addEventListener('click', abrir);
+  document.getElementById('mrFechar').addEventListener('click', fechar);
+  bg.addEventListener('click', e => { if (e.target === bg) fechar(); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') fechar(); });
+
+  function quando(r){
+    if (r.data){ const [y,m,d] = r.data.split('-'); return d+'/'+m; }
+    return r.dia === 'amanha' ? 'Amanhã' : 'Hoje';
+  }
+  function desenhar(r){
+    const cancelada = r.status === 'Cancelada';
+    const extras = [];
+    if (r.criancas > 0) extras.push(r.criancas + ' criança' + (r.criancas>1?'s':'') + ' 👶');
+    if (r.pcd > 0) extras.push(r.pcd + ' PCD/cadeirante' + (r.pcd>1?'s':'') + ' ♿');
+    document.getElementById('mrCard').innerHTML =
+      '<div class="cod">' + esc(r.codigo) + '</div>' +
+      '<div class="linha"><b>' + esc(r.cliente) + '</b></div>' +
+      '<div class="linha">' + quando(r) + ' · ' + esc(r.hora) + ' · ' + r.pessoas + ' pessoa' + (r.pessoas>1?'s':'') + '</div>' +
+      (extras.length ? '<div class="linha">' + extras.join(' · ') + '</div>' : '') +
+      '<span class="st ' + (cancelada?'cancelada':'') + '">' + (cancelada ? 'Cancelada' : 'Confirmada') + '</span>';
+    const ac = document.getElementById('mrAcoes');
+    if (cancelada){
+      ac.innerHTML = '<div class="mr-conf">Essa reserva já foi cancelada e a mesa foi liberada. Quer reservar de novo?</div><button class="modal-btn" id="mrNova" type="button">Fazer nova reserva</button>';
+      document.getElementById('mrNova').addEventListener('click', () => { fechar(); document.getElementById('reservar').scrollIntoView({behavior:'smooth'}); });
+      return;
+    }
+    ac.innerHTML = '<div class="mr-linha-btns"><button class="modal-btn sec" id="mrAlterar" type="button">Alterar</button><button class="modal-btn danger" id="mrCancelar" type="button">Cancelar</button></div>';
+    document.getElementById('mrAlterar').addEventListener('click', () => {
+      alterandoCodigo = r.codigo;
+      document.getElementById('fNome').value = r.cliente;
+      document.getElementById('fWa').value = r.telefone;
+      fechar();
+      document.getElementById('reservar').scrollIntoView({behavior:'smooth'});
+      toast('Escolha a nova data, horário ou quantidade e confirme. A reserva ' + r.codigo + ' só é cancelada quando a nova for confirmada.');
+    });
+    document.getElementById('mrCancelar').addEventListener('click', () => {
+      ac.innerHTML = '<div class="mr-conf">Tem certeza que quer cancelar a reserva <b>' + esc(r.codigo) + '</b>? A mesa é liberada na hora.</div>' +
+        '<div class="mr-linha-btns"><button class="modal-btn sec" id="mrVoltar" type="button">Voltar</button><button class="modal-btn danger" id="mrSim" type="button">Sim, cancelar</button></div>';
+      document.getElementById('mrVoltar').addEventListener('click', () => desenhar(r));
+      document.getElementById('mrSim').addEventListener('click', () => {
+        r.status = 'Cancelada';
+        reservasMudaram();
+        desenhar(r);
+      });
+    });
+  }
+
+  document.getElementById('mrBuscar').addEventListener('click', () => {
+    const cod = norm(iCod.value), zap = dig(iZap.value);
+    const r = RESERVAS.find(x => x.codigo === cod && x.telefone && dig(x.telefone) === zap);
+    if (!cod || cod === '#' || !zap){ erro.textContent = 'Preencha o código e o WhatsApp.'; erro.classList.add('show'); return; }
+    if (!r){ erro.textContent = 'Não encontramos uma reserva com esses dados. Confira o código e o número.'; erro.classList.add('show'); return; }
+    erro.classList.remove('show');
+    busca.style.display = 'none'; res.style.display = '';
+    desenhar(r);
+  });
+  [iCod,iZap].forEach(i => i.addEventListener('keydown', e => { if (e.key==='Enter') document.getElementById('mrBuscar').click(); }));
+})();
 </script>
 
 </body>
